@@ -55,13 +55,13 @@ Considering every single measurement isn't as useful as you expected: there's ju
 Instead, consider sums of a **three-measurement sliding window**. Again considering the above example:
 
 <pre>
-199  A      
-200  A B    
-208  A B C  
+199  A
+200  A B
+208  A B C
 210    B C D
 200  E   C D
 207  E F   D
-240  E F G  
+240  E F G
 269    F G H
 260      G H
 263        H
@@ -74,7 +74,7 @@ In the above example, the sum of each three-measurement window is as follows:
 
 <pre>
 A: 607 (N/A - no previous sum)
-B: 618 (increased</b>)
+B: 618 (<b>increased</b>)
 C: 618 (no change)
 D: 617 (decreased)
 E: 647 (<b>increased</b>)
