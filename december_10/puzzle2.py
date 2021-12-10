@@ -3,11 +3,13 @@
 INPUT_FILE = "./input.txt"
 OPENINGS = ('(', '[', '{', '<')
 CLOSINGS = (')', ']', '}', '>')
-ERROR_SCORES = {
-    ')': 3,
-    ']': 57,
-    '}': 1197,
-    '>': 25137
+# In order to avoid unnecessary cross-referencing, we simply use
+# the opening characters for the points, as the indexes are the same
+POINTS = {
+    '(': 1,
+    '[': 2,
+    '{': 3,
+    '<': 4
 }
 
 def is_matching_closing(stack, ch):
@@ -26,9 +28,11 @@ with open(INPUT_FILE, "r") as infile:
 
 
 # Process the data
-error_score = 0
+scores = []
 for line in input_lines:
     stack = []
+    line_is_corrupt = False
+
     for ch in line:
         assert ch in OPENINGS or ch in CLOSINGS
 
@@ -37,7 +41,20 @@ for line in input_lines:
 
         elif ch in CLOSINGS:
             if not is_matching_closing(stack, ch):
-                error_score += ERROR_SCORES[ch]
+                line_is_corrupt = True
                 break
- 
-print(f"Total syntax error score: {error_score}")
+
+    if not line_is_corrupt and stack:
+
+        # We have an incomplete line here
+        score = 0
+        for ch in stack[::-1]:
+            score *= 5
+            score += POINTS[ch]
+        scores.append(score)
+
+
+assert len(scores) % 2 == 1
+scores.sort()
+middle_score = scores[int((len(scores) - 1)/2)]
+print(f"Middle score: {middle_score}")
