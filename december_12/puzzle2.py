@@ -53,13 +53,13 @@ while stack:
             # Dealing with small caves
 
             if not twice_visitable_node_decided:
-                if path.count(next_node) == 0:
+                if next_node not in path:
                     # Branching out: we can continue with the undefined node for double visibility
                     # in case we haven't seen this node yet
                     stack.append((growing_path, next_node, None))
 
                 # ...or allocate the double visibility option for this node
-                elif next_node != END:
+                else:
                     stack.append((growing_path, next_node, next_node))
 
             elif (next_node not in path) or \
