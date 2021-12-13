@@ -7,8 +7,8 @@ def is_allowed(path, node):
     result = node not in path
     if path.count(node) == 1:
         # Make sure that no other small cave appears twice in the list
-        stats = [path.count(x) for x in path if x.islower() and x != node]
-        result = max(stats) < 2
+        other_small_cave_visited_twice = [True for x in path if x.islower() and path.count(x) == 2]
+        result = not other_small_cave_visited_twice
 
     return result
 
@@ -18,22 +18,32 @@ START = 'start'
 END = 'end'
 
 # Read the input and prepare the variable holding the data
-graph = {}
+graph = {
+    START: []
+}
 print("Using input file:", INPUT_FILE)
 with open(INPUT_FILE, "r") as infile:
     while line := infile.readline().rstrip():
         (from_node, to_node) = line.split("-")
-        if from_node not in graph:
+        print(line)
+        if from_node not in graph and from_node != END:
             graph[from_node] = []
 
         if to_node not in graph and to_node != END:
             graph[to_node] = []
 
-        graph[from_node].append(to_node)
+        # Assuming no "start-end" or "end-start" input
 
-        if from_node != START and to_node != END:
-            graph[to_node].append(from_node)
+        if to_node == START:
+            graph[START].append(from_node)
+        elif from_node == END:
+            graph[to_node].append(END)
+        else:
+            graph[from_node].append(to_node)
+            if from_node != START and to_node != END:
+                graph[to_node].append(from_node)
 
+print(graph)
 # graph = {'start': ['A', 'b'], 'A': ['c', 'b', 'end'], 'b': ['A', 'd', 'end'], 'c': ['A'], 'd': ['b']}
 
 # Process the data
@@ -44,7 +54,7 @@ while stack:
 
     # Check for victory
     if node == END:
-        print(found_path_count, path + [node])
+        # print(found_path_count, path + [node])
         found_path_count += 1
         continue
 
@@ -60,7 +70,7 @@ while stack:
             # Basic case: this node can be visited any times
             stack.append((growing_path, next_node, twice_visitable_node_decided))
 
-        elif next_node.islower() and is_allowed(path, node):
+        elif next_node.islower() and is_allowed(path, next_node):
             stack.append((growing_path, next_node, next_node))
 
         # elif next_node.islower():
