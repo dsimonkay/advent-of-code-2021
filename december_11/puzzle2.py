@@ -6,6 +6,7 @@ MAX_ENERGY_LEVEL = 9
 ROWS = None
 COLS = None
 
+
 def get_non_flashed_but_charged_cells(board, flashed):
     """
     Check whether the board contains cell which are charged (over the max energy level)
@@ -50,7 +51,7 @@ first_synchronized_step = None
 step = 0
 while not first_synchronized_step:
     step += 1
-    flashed = [[False for _ in range(COLS)] for _ in range(ROWS)] 
+    flashed = [[False for _ in range(COLS)] for _ in range(ROWS)]
 
     # Increase the counters
     for i in range(ROWS):

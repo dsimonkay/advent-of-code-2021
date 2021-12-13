@@ -2,6 +2,7 @@
 
 INPUT_FILE = "./input.txt"
 
+
 def get_counters(numbers, position):
     """
     Calculate the digit counts at a certain postion in a list of (binary) numbers represented as strings.

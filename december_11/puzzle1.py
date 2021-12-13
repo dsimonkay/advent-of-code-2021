@@ -7,6 +7,7 @@ MAX_ENERGY_LEVEL = 9
 ROWS = None
 COLS = None
 
+
 def print_board(board, cycle=None):
     """
     You guessed it -- print the board (debug).
@@ -58,7 +59,7 @@ COLS = len(board[0])  # Hello, input validation
 # Process the data
 flash_count = 0
 for cycle in range(NR_OF_CYCLES):
-    flashed = [[False for _ in range(COLS)] for _ in range(ROWS)] 
+    flashed = [[False for _ in range(COLS)] for _ in range(ROWS)]
 
     # Increase the counters
     for i in range(ROWS):

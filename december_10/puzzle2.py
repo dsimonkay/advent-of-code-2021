@@ -1,16 +1,12 @@
 #!/usr/bin/env python3
 
 INPUT_FILE = "./input.txt"
-OPENINGS = ('(', '[', '{', '<')
-CLOSINGS = (')', ']', '}', '>')
+OPENINGS = ("(", "[", "{", "<")
+CLOSINGS = (")", "]", "}", ">")
 # In order to avoid unnecessary cross-referencing, we simply use
 # the opening characters for the points, as the indexes are the same
-POINTS = {
-    '(': 1,
-    '[': 2,
-    '{': 3,
-    '<': 4
-}
+POINTS = {"(": 1, "[": 2, "{": 3, "<": 4}
+
 
 def is_matching_closing(stack, ch):
     """
@@ -19,6 +15,7 @@ def is_matching_closing(stack, ch):
     assert len(stack)
     ch_out = stack.pop()
     return OPENINGS.index(ch_out) == CLOSINGS.index(ch)
+
 
 # Read the input and prepare the variable holding the data
 input_lines = []
@@ -56,5 +53,5 @@ for line in input_lines:
 
 assert len(scores) % 2 == 1
 scores.sort()
-middle_score = scores[int((len(scores) - 1)/2)]
+middle_score = scores[int((len(scores) - 1) / 2)]
 print(f"Middle score: {middle_score}")
