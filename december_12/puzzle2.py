@@ -3,6 +3,16 @@
 import sys
 
 
+def is_allowed(path, node):
+    result = node not in path
+    if path.count(node) == 1:
+        # Make sure that no other small cave appears twice in the list
+        stats = [path.count(x) for x in path if x.islower() and x != node]
+        result = max(stats) < 2
+
+    return result
+
+
 INPUT_FILE = sys.argv[1] if len(sys.argv) > 1 else "./input_test.txt"
 START = 'start'
 END = 'end'
@@ -34,6 +44,7 @@ while stack:
 
     # Check for victory
     if node == END:
+        print(found_path_count, path + [node])
         found_path_count += 1
         continue
 
@@ -49,24 +60,27 @@ while stack:
             # Basic case: this node can be visited any times
             stack.append((growing_path, next_node, twice_visitable_node_decided))
 
-        elif next_node.islower():
-            # Dealing with small caves
+        elif next_node.islower() and is_allowed(path, node):
+            stack.append((growing_path, next_node, next_node))
 
-            if not twice_visitable_node_decided:
-                if next_node not in path:
-                    # Branching out: we can continue with the undefined node for double visibility
-                    # in case we haven't seen this node yet
-                    stack.append((growing_path, next_node, None))
+        # elif next_node.islower():
+        #     # Dealing with small caves
 
-                # ...or allocate the double visibility option for this node
-                else:
-                    stack.append((growing_path, next_node, next_node))
+        #     if not twice_visitable_node_decided:
+        #         if next_node not in path:
+        #             # Branching out: we can continue with the undefined node for double visibility
+        #             # in case we haven't seen this node yet
+        #             stack.append((growing_path, next_node, None))
 
-            elif (next_node not in path) or \
-                 (next_node == twice_visitable_node_decided and path.count(next_node) == 1):
-                # Either all is fine, as this is a small cave we're encountering for the first time OR
-                # we have already encountered this one, but we are allowed to visit it for a second time
-                stack.append((growing_path, next_node, twice_visitable_node_decided))
+        #         # ...or allocate the double visibility option for this node
+        #         else:
+        #             stack.append((growing_path, next_node, next_node))
+
+        #     elif (next_node not in path) or \
+        #          (next_node == twice_visitable_node_decided and path.count(next_node) == 1):
+        #         # Either all is fine, as this is a small cave we're encountering for the first time OR
+        #         # we have already encountered this one, but we are allowed to visit it for a second time
+        #         stack.append((growing_path, next_node, twice_visitable_node_decided))
 
 
 print(f"\nNumber of distinct paths found: {found_path_count}")
