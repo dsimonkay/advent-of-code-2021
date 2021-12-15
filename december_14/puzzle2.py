@@ -6,46 +6,40 @@ import sys
 INPUT_FILE = sys.argv[1] if len(sys.argv) > 1 else "./input.txt"
 NR_OF_STEPS = int(sys.argv[2]) if len(sys.argv) > 2 else 1
 
-def add(register, key):
+
+def add(register, key, count, is_last=False):
     """
-    Adds a single key to a register (if not already there) and increases its corresponding counter value.
+    Adds a key to a register (if not already there) and increases its corresponding counter value.
+    The register also holds an extra boolean flag (wherever this information is applicable.)
+    In our case the flag marks an element to be the last one if the register is the polymer itself.
+    (Actually, it's True for the last polymer pair only).
     """
-    if key:
-        if key not in register:
-            register[key] = 0
+    count_so_far = 0
+    is_last_so_far = False
+    if key in register:
+        (count_so_far, is_last_so_far) = register[key]
 
-        register[key] += 1
-
-def add_with_pos(register, key, position):
-    """
-    Adds a single key to a register (if not already there) and increases its corresponding counter value.
-    """
-    if key not in register or register[key] < position:
-        register[key] = position
-
-def get_last_pair(polymer):
-    max_pos = -1
-    last_pair = None
-    for pair in polymer:
-        position = polymer[pair]
-        if position > max_pos:
-            max_pos = position
-            last_pair = pair
-
-    return last_pair 
+    register[key] = (count_so_far + count, is_last_so_far or is_last)
 
 
-# Read the input and prepare the variable holding the data
+# The polymer pairs are stored as dictionary keys. They hold the information of how many times
+# the given pair occurs in the actual polymer (which we don't see in this version in its entire
+# form) and whether it's about the last pair in the chain.
 polymer = {}
 rules = {}
+
+# Read the input and prepare the variable holding the data
 with open(INPUT_FILE, "r") as infile:
 
     template = infile.readline().rstrip()
-    print("template:", template)
     for i in range(len(template) - 1):
         pair = template[i: i + 2]
-        print("adding pair:", pair)
-        add_with_pos(polymer, pair, i)
+        add(polymer, pair, 1)
+
+    # Mark the last pair as such
+    last_pair = template[-2:]
+    last_polymer_count = polymer[last_pair][0]
+    polymer[last_pair] = (last_polymer_count, True)
 
     infile.readline()
 
@@ -57,39 +51,34 @@ with open(INPUT_FILE, "r") as infile:
 assert polymer
 assert rules
 
-print("Polymer at the beginning:", polymer)
-
 # Do the processing
-register = {}
-for step in range(NR_OF_STEPS):
-    print(f"\nPolymer at step {step}: {polymer}")
-    register = {}
+for _ in range(NR_OF_STEPS):
     new_polymer = {}
 
-    for pair in polymer:
-        position = polymer[pair]
-        add(register, pair[0])
-
+    for pair, (count, is_last) in polymer.items():
         if pair in rules:
             to_insert = rules[pair]
-            add_with_pos(new_polymer, pair[0] + to_insert, position)
-            add_with_pos(new_polymer, to_insert + pair[1], position + 1)
-            add(register, to_insert)
+            add(new_polymer, pair[0] + to_insert, count)
+            add(new_polymer, to_insert + pair[1], count, is_last)
 
         else:
-            add_with_pos(new_polymer, pair, position)
-
-    last_pair = get_last_pair(polymer)
-    add(register, last_pair[1])
+            # This will never be the case, but for the sake of completeness it's been left here
+            add(new_polymer, pair, count, is_last)
 
     polymer = new_polymer
-    print("register:", register)
-    print("polymer:", polymer)
 
+# Collect the results
+char_register = {}
+for pair, (count, _) in polymer.items():
+    add(char_register, pair[0], count)
+
+    # Extrawurst in case of the last pair: counting the very last charater, too
+    if polymer[pair][1]:
+        add(char_register, pair[1], 1)
 
 # Calculate the posterior
-frequencies = [register[ch] for ch in register]
+frequencies = [char_register[ch][0] for ch in char_register]
 frequencies.sort()
 result = frequencies[-1] - frequencies[0]
 
-print(f"\nBlablabla result after {NR_OF_STEPS} steps: {result}")
+print(f"\nBlablabla ... result after {NR_OF_STEPS} steps: {result}")

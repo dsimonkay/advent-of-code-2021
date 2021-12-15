@@ -18,7 +18,7 @@ def add(register, ch):
 
 
 # Read the input and prepare the variable holding the data
-polymer = None
+polymer = None  # The ever-growing polymer as a simple string
 rules = {}
 with open(INPUT_FILE, "r") as infile:
 
@@ -35,8 +35,7 @@ assert rules
 
 # Do the processing
 register = {}
-for step in range(NR_OF_STEPS):
-    print(f"\nPolymer at step {step}: {polymer}")
+for _ in range(NR_OF_STEPS):
     register = {}
     new_polymer = ""
 
@@ -45,16 +44,18 @@ for step in range(NR_OF_STEPS):
         to_insert = rules[pair] if pair in rules else ""
         add(register, pair[0])
         add(register, to_insert)
+
+        # This is the step where the ineffectiveness comes from: growing the string
         new_polymer += pair[0] + to_insert
 
-    add(register, polymer[-1])
-    polymer = new_polymer + polymer[-1]
-    print("register:", register)
-    print("polymer:", polymer)
+    # Extrawurst for the last character
+    last_char = polymer[-1]
+    add(register, last_char)
+    polymer = new_polymer + last_char
 
 # Calculate the posterior
 frequencies = [register[ch] for ch in register]
 frequencies.sort()
 result = frequencies[-1] - frequencies[0]
 
-print(f"\nBlablabla result after {NR_OF_STEPS} steps: {result}")
+print(f"\nBlablabla ... result after {NR_OF_STEPS} steps: {result}")
