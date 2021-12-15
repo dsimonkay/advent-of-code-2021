@@ -28,7 +28,7 @@ def fold_up(paper, y, rows, cols):
     """
     for col in range(cols):
         for i in range(1, y + 1):
-            if y + i < rows:
+            if y + i < rows and y - i >= 0:
                 paper[y - i][col] |= paper[y + i][col]
 
     return y, cols
@@ -40,7 +40,7 @@ def fold_left(paper, x, rows, cols):
     """
     for row in range(rows):
         for i in range(1, x + 1):
-            if x + i < cols:
+            if x + i < cols and x - i >= 0:
                 paper[row][x - i] |= paper[row][x + i]
 
     return rows, x
