@@ -56,24 +56,21 @@ for _ in range(NR_OF_STEPS):
     new_polymer = {}
 
     for pair, (count, is_last) in polymer.items():
-        if pair in rules:
-            to_insert = rules[pair]
-            add(new_polymer, pair[0] + to_insert, count)
-            add(new_polymer, to_insert + pair[1], count, is_last)
+        assert pair in rules  # Yeah, the Lazy Approach :-/
 
-        else:
-            # This will never be the case, but for the sake of completeness it's been left here
-            add(new_polymer, pair, count, is_last)
+        to_insert = rules[pair]
+        add(new_polymer, pair[0] + to_insert, count)
+        add(new_polymer, to_insert + pair[1], count, is_last)
 
     polymer = new_polymer
 
 # Collect the results
 char_register = {}
-for pair, (count, _) in polymer.items():
+for pair, (count, is_last) in polymer.items():
     add(char_register, pair[0], count)
 
     # Extrawurst in case of the last pair: counting the very last charater, too
-    if polymer[pair][1]:
+    if is_last:
         add(char_register, pair[1], 1)
 
 # Calculate the posterior
