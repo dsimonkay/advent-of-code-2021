@@ -28,7 +28,7 @@ def add(register, key, count, is_last=False):
 polymer = {}
 rules = {}
 
-# Read the input and prepare the variable holding the data
+# Read the input and prepare the variables holding the data
 with open(INPUT_FILE, "r") as infile:
 
     template = infile.readline().rstrip()
