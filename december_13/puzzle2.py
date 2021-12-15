@@ -5,7 +5,7 @@ import sys
 
 INPUT_FILE = sys.argv[1] if len(sys.argv) > 1 else "./input_test.txt"
 NR_OF_FOLDS = 1
-
+BLOCK_CHAR = u"\u2588"
 
 def print_paper(paper, rows=None, cols=None):
     """
@@ -18,7 +18,7 @@ def print_paper(paper, rows=None, cols=None):
 
     for i in range(rows):
         for j in range(cols):
-            print("#" if paper[i][j] else ".", end="")
+            print(BLOCK_CHAR if paper[i][j] else " ", end="")
         print()
 
 
@@ -71,7 +71,6 @@ for dot in dots:
 rows += 1
 cols += 1
 
-print(f"Found {rows} rows and {cols} columns.\n")
 paper = [[False for _ in range(cols)] for _ in range(rows)]
 
 # Add the dots to the paper
