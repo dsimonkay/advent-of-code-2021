@@ -42,6 +42,9 @@ with open(INPUT_FILE, "r") as infile:
 costs = multiply_input(costs, 5)
 
 total_costs = [[0 for _ in row] for row in costs]
+is_explored = [[False for _ in row] for row in costs]
+in_frontier = [[False for _ in row] for row in costs]
+
 
 NR_OF_ROWS = len(costs)
 NR_OF_COLS = len(costs[0])
@@ -51,14 +54,14 @@ GOAL = (NR_OF_ROWS - 1, NR_OF_COLS - 1)
 # Easy hack: getting to the top right corner does not cost anything
 costs[0][0] = 0
 
-explored_cells = []
+explored_cells = 0
 frontier = [START]
 
 C = 100 / (NR_OF_ROWS * NR_OF_COLS)
 
 while frontier:
     elapsed = time.time() - START_TIME
-    map_discovered_percent = (len(explored_cells) + len(frontier)) * C
+    map_discovered_percent = (explored_cells + len(frontier)) * C
     print(f"Elapsed time: {int(elapsed / 60)} minutes {(elapsed % 60):.2f} seconds   Map discovered: {map_discovered_percent:.2f} %   ", end="\r")
 
     min_cost_estimate = 999999
@@ -83,15 +86,16 @@ while frontier:
     # Investigate possible candidates to visit from the picked cell
     for candidate in [(row - 1, col), (row, col - 1), (row, col + 1), (row + 1, col)]:
         (i, j) = candidate
-        if i < 0 or i == NR_OF_ROWS or j < 0 or j == NR_OF_COLS or candidate in explored_cells:
+        if i < 0 or i == NR_OF_ROWS or j < 0 or j == NR_OF_COLS or is_explored[i][j]:
             continue
 
         # picked cell total cost + candidate cell entering cost
         candidate_total_cost = total_costs[row][col] + costs[i][j]
 
         # We can finally add the cell to the frontier
-        if candidate not in frontier:
+        if not in_frontier[i][j]:
             frontier.append(candidate)
+            in_frontier[i][j] = True
 
         # Register the cost (or adjust it in case we've just found a cheaper way to the candidate)
         if total_costs[i][j] == 0 or total_costs[i][j] > candidate_total_cost:
@@ -99,7 +103,9 @@ while frontier:
 
     # Remove the processed cell from the frontier and add it to the discovered ones
     frontier.remove(picked_cell)
-    explored_cells.append(picked_cell)
+    in_frontier[row][col] = False
+    is_explored[row][col] = True
+    explored_cells += 1
 
 
 print(f"\nTotal lowest risk level on the shortest path: {total_costs[NR_OF_ROWS - 1][NR_OF_COLS - 1]}")
