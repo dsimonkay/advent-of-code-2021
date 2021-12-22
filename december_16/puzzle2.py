@@ -21,7 +21,7 @@ OP_TYPE_0_FIELD_LENGTH = 15
 OP_TYPE_1_FIELD_LENGTH = 11
 
 
-def parse_literal(input):
+def parse_literal(input, start_pos = 0):
     """
     Parses a literal from the input stream
     """
@@ -33,10 +33,11 @@ def parse_literal(input):
         if input[ch_count - 5] == LAST_LITERAL_MARKER:
             break
 
+    print(f"{' ' * start_pos}{input[:ch_count]}")
     return (int(literal, 2), ch_count)
 
 
-def parse_packet(input, stack, packets_to_read = 1):
+def parse_packet(input, stack, packets_to_read = 1, start_pos = 0):
     """
     Parses a binary bitstream (represented as a string).
     Returns the parsed packed as a dictionary with the keys "version", "type_id", "children" and "value" (optionally).
@@ -46,8 +47,13 @@ def parse_packet(input, stack, packets_to_read = 1):
     packet = {"value": None, "children": []}
     while input[ch_count:] and packets_read < packets_to_read:
 
+        print(f"{' ' * (start_pos)}X {len(packet['children'])}")
+
         version = int(input[ch_count: ch_count + 3], 2)
         type_id = int(input[ch_count + 3: ch_count + 6], 2)
+
+        print(f"{' ' * (start_pos + ch_count)}{input[ch_count: ch_count + 3]}")
+        print(f"{' ' * (start_pos + ch_count)}ty:{input[ch_count + 3: ch_count + 6]}")
 
         packet["version"] = version
         packet["type_id"] = type_id
@@ -55,12 +61,14 @@ def parse_packet(input, stack, packets_to_read = 1):
         stack.append({"version": version, "type_id": type_id})
 
         if type_id == TYPE_ID_LITERAL:
-            (literal, literal_ch_count) = parse_literal(input[ch_count + 6:])
+            (literal, literal_ch_count) = parse_literal(input[ch_count + 6:], start_pos + ch_count + 6)
             packet["value"] = literal
             ch_count += 6 + literal_ch_count
 
         else:
             length_type_id = input[ch_count + 6]
+            print(f"{' ' * (start_pos + ch_count + 6)}{length_type_id}")
+
             packet["length_type_id"] = length_type_id
             length_field_chars = 0
             subpacket = None
@@ -70,13 +78,15 @@ def parse_packet(input, stack, packets_to_read = 1):
                 length_field_chars = OP_TYPE_0_FIELD_LENGTH
                 field_end = field_start + length_field_chars
                 subpacket_length = int(input[field_start: field_end], 2)
-                subpacket = parse_packet(input[field_end: field_end + subpacket_length], stack, 999)
+                print(f"{' ' * (start_pos + field_start)}{input[field_start: field_end]} - {subpacket_length}")
+                subpacket = parse_packet(input[field_end: field_end + subpacket_length], stack, 999, start_pos + field_end)
                 assert subpacket_length == subpacket["length"]
 
             else:
                 length_field_chars = OP_TYPE_1_FIELD_LENGTH
                 field_end = field_start + length_field_chars
                 nr_of_subpackets_to_read = int(input[field_start: field_end], 2)
+                print(f"{' ' * (start_pos + ch_count + 7)}{input[field_start: field_end]} - #{nr_of_subpackets_to_read}")
                 subpacket = parse_packet(input[field_end:], stack, nr_of_subpackets_to_read)
 
             assert subpacket
@@ -120,7 +130,7 @@ def evaluate(packet, indent=0):
     elif packet["type_id"] == TYPE_ID_EQUAL_TO:
         op_str = "EQ"
 
-    length_type_info = (" " + packet["length_type_id"]) if "length_type_id" in packet else ""
+    length_type_info = (" (length info type: " + packet["length_type_id"] + ")") if "length_type_id" in packet else ""
     subpacket_info = (" (subpackets: " + str(len(packet["children"])) + ")") if len(packet["children"]) else ""
     value_info = (" " + str(packet["value"])) if packet["value"] else ""
     print(f"{' ' * indent}{op_str}{length_type_info}{subpacket_info}{value_info}")
@@ -154,7 +164,8 @@ def evaluate(packet, indent=0):
 
     elif packet["type_id"] == TYPE_ID_EQUAL_TO:
         # assert len(subpacket_values) == 2
-        value = 1 if subpacket_values[0] == subpacket_values[1] else 0
+        # value = 1 if subpacket_values[0] == subpacket_values[1] else 0
+        value = 1
 
     return value
 
@@ -165,7 +176,11 @@ input = ""
 with open(INPUT_FILE, "r") as infile:
     line = infile.readline().rstrip()
     for _, ch in enumerate(line):
+        print(f"   {ch}", end="")
         input += bin(int(ch, 16))[2:].zfill(4)
+    print()
+
+print(input)
 
 stack = []
 packet = parse_packet(input, stack)
